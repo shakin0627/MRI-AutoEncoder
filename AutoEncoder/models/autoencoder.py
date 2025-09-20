@@ -18,7 +18,7 @@ class PreTrained_AutoEncoder(pl.LightningModule):
         self.temperature = temperature
         self.lambda_rec = lambda_rec
         self.lambda_nce = lambda_nce
-        self.save_hyperparameters(ignore=['input_size'])  ## Optional
+        self.save_hyperparameters()  ## Optional
 
         feat_c = None
         for m in reversed(list(self.encoder.net)):

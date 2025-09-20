@@ -1,5 +1,5 @@
 from .mri_contrastive import MRIContrastiveDataset
-def get_dataset(dataset_name, root, split="train", modalities=None, transform=None, fixed_pair=False):
+def get_dataset(dataset_name, root, split="train", modalities=None, transform=None, fixed_pair=False, allow_same_modality=True):
     """
     返回对应的数据集实例
     dataset_name: "mri_contrastive" 或别名
@@ -11,7 +11,7 @@ def get_dataset(dataset_name, root, split="train", modalities=None, transform=No
     """
     ds = dataset_name.lower()
     if ds in ("mri_contrastive", "mri_png", "mri"): ## 数据集种类可扩展
-        return MRIContrastiveDataset(root=root, split=split, modalities=modalities, transform=transform, fixed_pair=fixed_pair)
+        return MRIContrastiveDataset(root=root, split=split, modalities=modalities, transform=transform, fixed_pair=fixed_pair, allow_same_modality=allow_same_modality)
     else:
         raise ValueError(f"Unknown dataset: {dataset_name}")
     

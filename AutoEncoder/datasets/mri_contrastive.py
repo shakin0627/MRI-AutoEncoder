@@ -106,7 +106,7 @@ class PairTransform:
         return x_anchor, x_pos
 
 class MRIContrastiveDataset(Dataset):
-    def __init__(self, root, split="train", transform=None, modalities=None, fixed_pair=False):
+    def __init__(self, root, split="train", transform=None, modalities=None, fixed_pair=False, allow_same_modality=True):
         """
         Args:
             root: 数据根目录, 例如 ./data/MRI
@@ -117,6 +117,7 @@ class MRIContrastiveDataset(Dataset):
             transform: 图像预处理
             fixed_pair: 如果 True，就只用前两个模态做配对 (modalities[0], modalities[1])
                         如果 False，就在所有模态中随机采样一对 (anchor, pos)
+            allow_same_modality: 是否只能选择两个不同模态成为anchor/pos
         """
         super().__init__()
         self.root = os.path.join(root, split)
@@ -137,6 +138,7 @@ class MRIContrastiveDataset(Dataset):
             self.transform = transform
 
         self.pair_transform = PairTransform(p_blur=0.2, p_jitter=0.3, p_elastic=0.3) if split == "train" else None
+        self.allow_same_modality = allow_same_modality
 
         # 自动推断可用模态
         if modalities is None:
@@ -169,8 +171,13 @@ class MRIContrastiveDataset(Dataset):
             # 固定模态对 (T1, T2)
             anchor_mod, pos_mod = self.modalities[:2]
         else:
-            # 在所有模态中随机选择不同的两个
-            anchor_mod, pos_mod = random.sample(self.modalities, 2)
+            if self.allow_same_modality:
+                # 可以相同模态
+                anchor_mod, pos_mod = random.choices(self.modalities, k=2)
+            else:
+                # 必须不同模态
+                anchor_mod, pos_mod = random.sample(self.modalities, 2)
+
 
         ## 文件找不到时抛出FileNotFound Error
         def find_file(patient_dir, base_name):
